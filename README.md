@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🏟️ Stadium OS
-### World Cup 2026 · Real-Time Stadium Mission Control Platform
+### World Cup 2026 · Real-Time Stadium Mission Control Platform fro PromptWar Virtual-Challenge4
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
