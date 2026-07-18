@@ -11,6 +11,8 @@ import React, { useState, useEffect } from 'react';
 import { StadiumOSProvider, useStadiumOS } from '../context/StadiumOSContext';
 import { Activity, Clock, Users, ShieldAlert, Heart, Compass, Globe, Sparkles } from 'lucide-react';
 import { t } from '../utils/translations';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { Toast } from '../components/Toast';
 import './globals.css';
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
@@ -20,7 +22,9 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
     setPreferredLanguage,
     stepFree,
     setStepFree,
-    resetDemo
+    resetDemo,
+    toasts,
+    removeToast
   } = useStadiumOS();
 
   // Clock state
@@ -37,6 +41,11 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <html lang={preferredLanguage} dir={isArabic ? 'rtl' : 'ltr'}>
+      <head>
+        <title>Stadium OS - FIFA World Cup 2026 Smart Stadium Operating System</title>
+        <meta name="description" content="Decentralized multi-agent smart stadium operating system for the FIFA World Cup 2026." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
       <body className="bg-obsidian-dark text-slate-100 font-sans min-h-screen md:h-screen w-full md:overflow-hidden flex flex-col select-none">
         
         {/* ── FIXED TOP STATUS BAR (WCAG compliant) ── */}
@@ -121,10 +130,29 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
+        {/* Skip Navigation Link for WCAG A11y */}
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-stadium-blue focus:text-obsidian-dark focus:px-4 focus:py-2 focus:rounded-xl focus:z-50 font-bold text-xs uppercase tracking-wide"
+        >
+          Skip to main content
+        </a>
+
         {/* ── PAGE CONTENT WRAPPER ── */}
-        <main className="flex-1 overflow-hidden relative">
-          {children}
+        <main id="main-content" className="flex-1 overflow-hidden relative">
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
+
+        {/* Toast Notification Container */}
+        <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50 pointer-events-none" style={{ direction: 'ltr' }}>
+          {toasts.map(toast => (
+            <div key={toast.id} className="pointer-events-auto">
+              <Toast toast={toast} onClose={removeToast} />
+            </div>
+          ))}
+        </div>
 
       </body>
     </html>

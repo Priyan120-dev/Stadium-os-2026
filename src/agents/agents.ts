@@ -10,7 +10,7 @@ import { AgentEvent, AgentLog, Timestamp, Volunteer, Incident, Concession, Trans
 import { navigationAgent } from './navigationAgent';
 import { translateText } from './translationAgent';
 import { accessibilityModule } from '../modules/accessibilityModule';
-import { ticketModule, foodModule, securityModule } from '../modules/stadiumOperations';
+import { incidentService } from '../services/incidentService';
 
 // ---------------------------------------------------------------------------
 // 12-AGENT REGISTRY & CAPABILITIES
@@ -183,7 +183,7 @@ export async function processLocalEvent(
       const section = payload.section || 'Sec104';
       
       // Auto actions: Create incident + alert nearest staff
-      const newIncident = securityModule.createIncidentReport(section, 'medical', 'Fan Mateo García reported medical distress (chest pain) at Sec 104.');
+      const newIncident = incidentService.createIncidentReport(section, 'medical', 'Fan Mateo García reported medical distress (chest pain) at Sec 104.');
       
       dbState.setIncidents(prev => {
         if (prev.some(i => i.id === newIncident.id || (i.nodeId === section && i.type === 'medical' && i.status === 'active'))) {

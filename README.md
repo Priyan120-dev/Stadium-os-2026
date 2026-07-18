@@ -71,6 +71,27 @@ Open the live deployment and navigate to any role-specific view:
 
 ## 🧠 Key Features & Architecture
 
+```mermaid
+graph TD
+    classDef default fill:#101622,stroke:#1e293b,stroke-width:1px,color:#94a3b8;
+    classDef agent fill:#0f172a,stroke:#00b0ff,stroke-width:2px,color:#00b0ff;
+    classDef eventBus fill:#0f172a,stroke:#00e676,stroke-width:2px,color:#00e676;
+    classDef user fill:#0f172a,stroke:#ffd700,stroke-width:2px,color:#ffd700;
+
+    U[ Mateo García / Fan App ] -->|1. Triggers Action e.g., Panic Button| EB(Event Bus Queue)
+    EB -->|2. Lease Event| MA[Command Orchestrator]
+    MA -->|3. Match Capability| CR[Capability Registry]
+    CR -->|4. Resolve Target Agent| EA[Emergency Agent]
+    EA -->|5. Compute Reroute| NA[Navigation Agent]
+    EA -->|6. Mobilize Staff| VA[Volunteer Agent]
+    VA -->|7. Push Task| ST[Staff Tablet / Sarah Chen]
+    NA -->|8. Highlight Path| DT[Digital Twin Map]
+
+    class U,ST user;
+    class EB eventBus;
+    class MA,EA,NA,VA agent;
+```
+
 ### 1. Decentralized Multi-Agent Orchestrator
 
 The heart of Stadium OS is a **swarm-based event bus** modeled on production multi-agent system patterns:

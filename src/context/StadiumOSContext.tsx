@@ -37,6 +37,7 @@ import {
 } from '../mockData';
 import { processLocalEvent } from '../agents/agents';
 import { translateText } from '../agents/translationAgent';
+import { ToastItem } from '../types';
 
 export interface StadiumOSContextType {
   // Database States
@@ -76,6 +77,9 @@ export interface StadiumOSContextType {
   rejectCriticalAction: (eventId: string) => void;
   updateAgentMetric: (agentName: string, update: Partial<AgentMetric>) => void;
   resetDemo: () => void;
+  toasts: ToastItem[];
+  showToast: (message: string, type?: ToastItem['type'], duration?: number) => void;
+  removeToast: (id: string) => void;
 }
 
 const StadiumOSContext = createContext<StadiumOSContextType | undefined>(undefined);
@@ -106,6 +110,17 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
   const [navigationMode, setNavigationMode] = useState<NavigationMode>('fastest');
 
   const activeUser = users['USR-001'] || initialUsers['USR-001'];
+
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const showToast = useCallback((message: string, type: ToastItem['type'] = 'info', duration = 5000) => {
+    const id = `toast-${Math.random().toString(36).substr(2, 9)}`;
+    setToasts(prev => [...prev, { id, message, type, duration }]);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   const updateAgentMetric = useCallback((agentName: string, update: Partial<AgentMetric>) => {
     setAgentMetrics(prev => ({
@@ -286,6 +301,17 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
 
     setAgentEvents(prev => [...prev, newEvent]);
     addAgentLog('Event Bus', sourceAgent, `Queued new event: "${eventType}" [Priority: ${priority}]`, 'info', correlationId);
+
+    if (eventType === 'PANIC_PRESSED') {
+      showToast('CRITICAL: Medical panic alarm triggered in Section 104!', 'critical');
+    } else if (eventType === 'LOST_CHILD_UPLOAD') {
+      showToast('AMBER ALERT: Lost child report submitted. Initializing Vision search...', 'warning');
+    } else if (eventType === 'STAFF_DISPATCH') {
+      showToast('DISPATCH ACTIVE: Crew member mobilized to incident location.', 'info');
+    } else {
+      showToast(`Agent Event Queued: "${eventType}"`, 'info');
+    }
+
     return eventId;
   };
 
@@ -307,6 +333,7 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
     setDemoState('ready');
 
     addAgentLog('Volunteer App', 'Command Center', `Incident ${incidentId} resolved by Volunteer ${volunteerId}.`, 'info', correlationId);
+    showToast(`Incident ${incidentId} resolved successfully. Crew member status updated to available.`, 'success');
   };
 
   // --- MANUAL EMERGENCY ACTION GATES ---
@@ -323,6 +350,7 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
     const event = agentEvents.find(e => e.eventId === eventId);
     if (event) {
       addAgentLog('Operations Command', 'Emergency Agent', `CRITICAL ACTION APPROVED: ${event.payload.actionType}. Dispatching sirens / warning banners.`, 'critical', correlationId);
+      showToast(`CRITICAL EVENT SIGNALS ACTIVATED: ${event.payload.actionType} is now active.`, 'critical');
       
       // Trigger a visual warning alert
       addAlert({
@@ -355,6 +383,7 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
     const event = agentEvents.find(e => e.eventId === eventId);
     if (event) {
       addAgentLog('Operations Command', 'Emergency Agent', `CRITICAL ACTION ABORTED: ${event.payload.actionType} rejected by Human Command.`, 'warning', correlationId);
+      showToast(`Proposed critical action ${event.payload.actionType} rejected by Human Command.`, 'warning');
     }
   };
 
@@ -533,6 +562,7 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
     setStepFreeState(false);
     setHighlightedPath([]);
     setDemoState('ready');
+    setToasts([]);
     isWorkerProcessing = false;
   };
 
@@ -569,7 +599,10 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
       approveCriticalAction,
       rejectCriticalAction,
       updateAgentMetric,
-      resetDemo
+      resetDemo,
+      toasts,
+      showToast,
+      removeToast
     }}>
       {children}
     </StadiumOSContext.Provider>

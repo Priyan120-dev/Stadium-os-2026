@@ -1199,3 +1199,8 @@ h1, h2, h3, h4, h5, h6 {
 .animate-scan-sweep {
   animation: scan-sweep 1.5s ease-in-out infinite;
 }
+
+/* Toast slide-in animation */
+.animate-slide-in {
+  animation: slide-in-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

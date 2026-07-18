@@ -9,3 +9,9 @@ dist
 out
 .vscode/settings.json
 .vscode/launch.json
+
+# Tests & builds
+test-results/
+playwright-report/
+src/test_nav.js
+tsconfig.tsbuildinfo
