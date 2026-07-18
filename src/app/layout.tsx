@@ -37,14 +37,14 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <html lang={preferredLanguage} dir={isArabic ? 'rtl' : 'ltr'}>
-      <body className="bg-obsidian-dark text-slate-100 font-sans h-screen w-screen overflow-hidden flex flex-col select-none">
+      <body className="bg-obsidian-dark text-slate-100 font-sans min-h-screen md:h-screen w-full md:overflow-hidden flex flex-col select-none">
         
         {/* ── FIXED TOP STATUS BAR (WCAG compliant) ── */}
-        <header className="h-14 bg-obsidian-card/90 border-b border-obsidian-border/80 backdrop-blur-md flex items-center justify-between px-6 z-50 select-none">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-stadium-green animate-pulse" />
-              <span className="font-display font-extrabold uppercase tracking-wide text-md bg-gradient-to-r from-white to-stadium-green bg-clip-text text-transparent">
+        <header className="h-14 bg-obsidian-card/90 border-b border-obsidian-border/80 backdrop-blur-md flex items-center justify-between px-3 sm:px-6 z-50 select-none">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1.5">
+              <img src="/stadium-os-logo.svg" alt="Stadium OS logo" aria-label="Stadium OS logo" className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
+              <span className="font-display font-extrabold uppercase tracking-wide text-xs sm:text-md bg-gradient-to-r from-white to-stadium-green bg-clip-text text-transparent">
                 {t('stadium.title', preferredLanguage)}
               </span>
             </div>
@@ -54,15 +54,15 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold select-none">
+          <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs font-semibold select-none">
             {/* Live Clock */}
-            <div className="flex items-center gap-1.5 text-slate-400">
+            <div className="hidden sm:flex items-center gap-1.5 text-slate-400">
               <Clock className="h-3.5 w-3.5" />
               <span className="font-mono text-slate-200">{timeText}</span>
             </div>
 
             {/* Stadium Occupancy */}
-            <div className="hidden sm:flex items-center gap-1.5 text-slate-400">
+            <div className="hidden lg:flex items-center gap-1.5 text-slate-400">
               <Users className="h-3.5 w-3.5 text-stadium-blue" />
               <span>{t('status.occupancy', preferredLanguage)}: <span className="font-mono text-slate-200 font-bold">76,422 / 80,000 (95.5%)</span></span>
               <span className="text-[9px] bg-stadium-blue/10 border border-stadium-blue/30 text-stadium-blue px-1 rounded uppercase tracking-wider">{t('status.demo_notice', preferredLanguage)}</span>
@@ -75,10 +75,10 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Active Incidents */}
-            <div className="flex items-center gap-1.5">
-              <ShieldAlert className={`h-4 w-4 ${activeIncCount > 0 ? 'text-stadium-red animate-bounce' : 'text-slate-500'}`} />
-              <span className="text-slate-400">{t('status.incidents', preferredLanguage)}: </span>
-              <span className={`px-1.5 py-0.5 rounded font-mono ${activeIncCount > 0 ? 'bg-stadium-red/20 border border-stadium-red/40 text-stadium-red' : 'bg-white/5 text-slate-400'}`}>
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <ShieldAlert className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${activeIncCount > 0 ? 'text-stadium-red animate-bounce' : 'text-slate-500'}`} />
+              <span className="hidden sm:inline text-slate-400">{t('status.incidents', preferredLanguage)}: </span>
+              <span className={`px-1 sm:px-1.5 py-0.5 rounded font-mono ${activeIncCount > 0 ? 'bg-stadium-red/20 border border-stadium-red/40 text-stadium-red' : 'bg-white/5 text-slate-400'}`}>
                 {activeIncCount}
               </span>
             </div>
@@ -96,25 +96,25 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Language Selector */}
-            <div className="flex items-center gap-2 border-l border-white/10 pl-4">
-              <Globe className="h-3.5 w-3.5 text-stadium-gold" />
+            <div className="flex items-center gap-1 border-l border-white/10 pl-2 sm:pl-4">
+              <Globe className="h-3.5 w-3.5 text-stadium-gold hidden xs:inline" />
               <select
                 value={preferredLanguage}
                 onChange={(e) => setPreferredLanguage(e.target.value)}
-                className="bg-obsidian-card border border-white/10 text-slate-200 rounded px-1.5 py-0.5 text-xs outline-none cursor-pointer focus:border-stadium-gold"
+                className="bg-obsidian-card border border-white/10 text-slate-200 rounded px-1 py-0.5 text-[10px] sm:text-xs outline-none cursor-pointer focus:border-stadium-gold"
               >
-                <option value="en">English (EN)</option>
-                <option value="es">Español (ES)</option>
-                <option value="ar">العربية (AR)</option>
-                <option value="pt">Português (PT)</option>
-                <option value="fr">Français (FR)</option>
+                <option value="en">EN</option>
+                <option value="es">ES</option>
+                <option value="ar">AR</option>
+                <option value="pt">PT</option>
+                <option value="fr">FR</option>
               </select>
             </div>
 
             {/* Reset Simulation */}
             <button 
               onClick={resetDemo}
-              className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-slate-300 hover:bg-stadium-red/20 hover:border-stadium-red hover:text-stadium-red transition-all duration-150"
+              className="px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded bg-white/5 border border-white/10 text-slate-300 hover:bg-stadium-red/20 hover:border-stadium-red hover:text-stadium-red transition-all duration-150 text-[10px] sm:text-xs"
             >
               {t('status.reset', preferredLanguage)}
             </button>

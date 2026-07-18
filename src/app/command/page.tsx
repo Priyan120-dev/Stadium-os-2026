@@ -78,16 +78,16 @@ export default function CommandMissionControlPage() {
   };
 
   return (
-    <div className="h-full w-full bg-obsidian-dark flex flex-col p-6 overflow-hidden select-none">
+    <div className="h-full w-full bg-obsidian-dark flex flex-col p-4 sm:p-6 overflow-y-auto lg:overflow-hidden select-none">
       
       {/* Upper Grid Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden mb-4">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-y-auto lg:overflow-hidden mb-4">
         
         {/* Left 8 Columns: Map Cockpit & Concessions Graph */}
-        <div className="lg:col-span-8 flex flex-col gap-6 overflow-hidden">
+        <div className="lg:col-span-8 flex flex-col gap-6 overflow-y-auto lg:overflow-hidden shrink-0">
           
           {/* Main SVG Map Twin */}
-          <div className="flex-1 bg-obsidian-card/45 border border-white/10 rounded-2xl p-4 flex flex-col overflow-hidden relative backdrop-blur-xl">
+          <div className="flex-1 min-h-[380px] lg:min-h-0 bg-obsidian-card/45 border border-white/10 rounded-2xl p-4 flex flex-col overflow-hidden relative backdrop-blur-xl">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-1.5">
                 <Monitor className="h-4 w-4 text-stadium-green" />
@@ -121,14 +121,14 @@ export default function CommandMissionControlPage() {
           {/* HTML5 Concessions queue wait-time bar chart */}
           <div className="h-44 bg-obsidian-card/45 border border-white/10 rounded-2xl p-4 flex flex-col backdrop-blur-xl select-none">
             <div className="text-[10px] font-bold text-slate-500 uppercase mb-3">{t('cmd.wait_times', preferredLanguage)}</div>
-            <div className="flex-1 flex items-end gap-6 px-4">
+            <div className="flex-1 flex items-end gap-2 sm:gap-6 px-1 sm:px-4 overflow-x-auto">
               {Object.values(concessions).map(stand => {
                 const maxWait = 20;
                 const heightPct = Math.min((stand.waitMin / maxWait) * 100, 100);
                 const isHigh = stand.waitMin >= 12;
 
                 return (
-                  <div key={stand.id} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                  <div key={stand.id} className="flex-1 flex flex-col items-center gap-2 h-full justify-end min-w-[50px]">
                     <span className={`text-[10px] font-mono font-bold ${isHigh ? 'text-stadium-red' : 'text-stadium-green'}`}>
                       {stand.waitMin}m
                     </span>
@@ -138,7 +138,7 @@ export default function CommandMissionControlPage() {
                         style={{ height: `${heightPct}%` }}
                       />
                     </div>
-                    <span className="text-[9px] text-slate-400 truncate max-w-[65px] font-semibold">
+                    <span className="text-[9px] text-slate-400 truncate max-w-[50px] sm:max-w-[70px] font-semibold">
                       {stand.name}
                     </span>
                   </div>
@@ -150,7 +150,7 @@ export default function CommandMissionControlPage() {
         </div>
 
         {/* Right 4 Columns: Control deck, alerts, and system health */}
-        <div className="lg:col-span-4 flex flex-col gap-6 overflow-hidden">
+        <div className="lg:col-span-4 flex flex-col gap-6 overflow-y-auto lg:overflow-hidden shrink-0">
           
           {/* Emergency dispatch override card */}
           <div className="bg-obsidian-card/45 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 backdrop-blur-xl select-none">

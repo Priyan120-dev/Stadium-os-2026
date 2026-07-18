@@ -18,7 +18,7 @@ export default function RoleSelectorPage() {
   const { preferredLanguage } = useStadiumOS();
 
   return (
-    <div className="h-full w-full bg-obsidian-dark flex flex-col justify-center items-center px-6 relative select-none">
+    <div className="min-h-full py-12 md:py-0 w-full bg-obsidian-dark flex flex-col justify-center items-center px-6 relative select-none">
       
       {/* Background SVG nodes mesh grid (calm neon cyberpunk styling) */}
       <div className="absolute inset-0 opacity-15 pointer-events-none overflow-hidden">
@@ -37,9 +37,12 @@ export default function RoleSelectorPage() {
       <div className="max-w-5xl w-full flex flex-col items-center z-10 text-center select-none">
         
         {/* Stadium OS Branding Hero */}
-        <div className="flex items-center gap-2 mb-3 bg-white/5 border border-white/10 px-3 py-1 rounded-full text-xs font-bold text-stadium-green">
-          <Sparkles className="h-4 w-4 animate-pulse" />
-          {t('landing.badge', preferredLanguage)}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <img src="/stadium-os-logo.svg" alt="Stadium OS logo" aria-label="Stadium OS logo" className="h-20 w-20 animate-pulse drop-shadow-[0_0_20px_rgba(0,176,255,0.25)]" />
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full text-xs font-bold text-stadium-green">
+            <Sparkles className="h-4 w-4 animate-pulse" />
+            {t('landing.badge', preferredLanguage)}
+          </div>
         </div>
 
         <h1 className="font-display font-extrabold text-4xl md:text-6xl tracking-tight text-white mb-4">

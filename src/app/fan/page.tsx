@@ -188,13 +188,13 @@ export default function FanCompanionPage() {
   };
 
   return (
-    <div className="h-full w-full bg-obsidian-dark flex justify-center items-center p-4 overflow-hidden select-none">
+    <div className="h-full w-full bg-obsidian-dark flex justify-center items-center p-0 sm:p-4 md:overflow-hidden select-none">
       
       {/* Smartphone frame shell */}
-      <div className="max-w-md w-full h-[640px] bg-obsidian-card border border-white/10 rounded-[36px] overflow-hidden flex flex-col shadow-neon-blue relative">
+      <div className="max-w-md w-full h-full sm:h-[640px] bg-obsidian-card border-0 sm:border border-white/10 rounded-none sm:rounded-[36px] overflow-hidden flex flex-col shadow-none sm:shadow-neon-blue relative">
         
         {/* Device Top Speaker / Notch notch */}
-        <div className="h-6 bg-obsidian-dark flex justify-center items-center select-none">
+        <div className="hidden sm:flex h-6 bg-obsidian-dark justify-center items-center select-none">
           <div className="w-24 h-4 bg-obsidian-card rounded-b-xl border-x border-b border-white/10" />
         </div>
 
@@ -280,9 +280,9 @@ export default function FanCompanionPage() {
                   placeholder="Type message..."
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-stadium-blue"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 h-11 text-xs text-slate-200 outline-none focus:border-stadium-blue"
                 />
-                <button type="submit" className="p-2 bg-stadium-blue/10 border border-stadium-blue/30 text-stadium-blue rounded-xl hover:bg-stadium-blue hover:text-obsidian-dark">
+                <button type="submit" className="h-11 w-11 flex items-center justify-center bg-stadium-blue/10 border border-stadium-blue/30 text-stadium-blue rounded-xl hover:bg-stadium-blue hover:text-obsidian-dark shrink-0">
                   <Send className="h-4 w-4" />
                 </button>
               </form>

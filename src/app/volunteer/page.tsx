@@ -45,10 +45,10 @@ export default function VolunteerTabletPage() {
   };
 
   return (
-    <div className="h-full w-full bg-obsidian-dark flex justify-center items-center p-6 overflow-hidden select-none">
+    <div className="h-full w-full bg-obsidian-dark flex justify-center items-center p-0 sm:p-6 md:overflow-hidden select-none">
       
       {/* Tablet Shell */}
-      <div className="max-w-2xl w-full h-[600px] bg-obsidian-card border border-white/10 rounded-[28px] overflow-hidden flex flex-col shadow-neon-gold relative">
+      <div className="max-w-2xl w-full h-full sm:h-[600px] bg-obsidian-card border-0 sm:border border-white/10 rounded-none sm:rounded-[28px] overflow-hidden flex flex-col shadow-none sm:shadow-neon-gold relative">
         
         {/* Tablet Header */}
         <div className="px-6 py-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
@@ -66,10 +66,10 @@ export default function VolunteerTabletPage() {
           </span>
         </div>
 
-        <div className="flex-1 p-6 flex flex-col md:flex-row gap-6 overflow-hidden">
+        <div className="flex-1 p-4 sm:p-6 flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-hidden">
           
           {/* Left: Crew Selector */}
-          <div className="w-full md:w-1/3 flex flex-col gap-3">
+          <div className="w-full md:w-1/3 flex flex-col gap-3 shrink-0">
             <h3 className="text-[10px] font-bold text-slate-500 uppercase">{t('vol.crew_roster', preferredLanguage)}</h3>
             <div className="flex-1 space-y-2 overflow-y-auto">
               {volunteers.map(v => (

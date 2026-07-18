@@ -93,6 +93,7 @@ export default function SimulatorSandbox() {
   // Approval Overlay/Gate States
   const [activeApprovalEvent, setActiveApprovalEvent] = useState<any>(null);
   const [approvalCountdown, setApprovalCountdown] = useState(15);
+  const [activeSimulatorTab, setActiveSimulatorTab] = useState<'fan' | 'volunteer' | 'command'>('fan');
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
@@ -308,15 +309,37 @@ export default function SimulatorSandbox() {
   };
 
   return (
-    <div className="h-full w-full bg-obsidian-dark flex flex-col relative select-none">
+    <div className="h-full w-full bg-obsidian-dark flex flex-col relative select-none overflow-y-auto lg:overflow-hidden">
       
+      {/* Mobile Tab Switcher */}
+      <div className="flex lg:hidden bg-obsidian-card/90 border-b border-white/10 px-4 py-2 gap-2 select-none z-10 shrink-0">
+        <button
+          onClick={() => setActiveSimulatorTab('fan')}
+          className={`flex-1 py-2 text-xs font-bold font-display uppercase tracking-wider rounded-xl transition-all duration-150 ${activeSimulatorTab === 'fan' ? 'bg-stadium-blue/20 border border-stadium-blue text-stadium-blue shadow-neon-blue' : 'bg-white/5 border border-white/5 text-slate-500 hover:text-slate-300'}`}
+        >
+          {t('fan.title', preferredLanguage)}
+        </button>
+        <button
+          onClick={() => setActiveSimulatorTab('volunteer')}
+          className={`flex-1 py-2 text-xs font-bold font-display uppercase tracking-wider rounded-xl transition-all duration-150 ${activeSimulatorTab === 'volunteer' ? 'bg-stadium-gold/20 border border-stadium-gold text-stadium-gold shadow-neon-gold' : 'bg-white/5 border border-white/5 text-slate-500 hover:text-slate-300'}`}
+        >
+          {t('vol.tablet_title', preferredLanguage)}
+        </button>
+        <button
+          onClick={() => setActiveSimulatorTab('command')}
+          className={`flex-1 py-2 text-xs font-bold font-display uppercase tracking-wider rounded-xl transition-all duration-150 ${activeSimulatorTab === 'command' ? 'bg-stadium-green/20 border border-stadium-green text-stadium-green shadow-neon' : 'bg-white/5 border border-white/5 text-slate-500 hover:text-slate-300'}`}
+        >
+          {t('cmd.badge', preferredLanguage)}
+        </button>
+      </div>
+
       {/* ── UNIFIED 3-PANEL RESPONSIVE GRID ── */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden select-none">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-y-auto lg:overflow-hidden select-none">
         
         {/* ═════════════════════════════════════════════════════════════════════════
             PANEL 1: FAN COMPANION (Mobile Shell) - lg:col-span-3
             ═════════════════════════════════════════════════════════════════════════ */}
-        <section className="lg:col-span-3 bg-obsidian-card/45 border border-white/10 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl relative select-none shadow-lg">
+        <section className={`min-h-[580px] lg:min-h-0 lg:col-span-3 bg-obsidian-card/45 border border-white/10 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl relative select-none shadow-lg ${activeSimulatorTab === 'fan' ? 'flex' : 'hidden lg:flex'}`}>
           <div className="h-12 bg-white/5 border-b border-white/10 px-4 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-stadium-blue shadow-neon animate-pulse" />
@@ -483,7 +506,7 @@ export default function SimulatorSandbox() {
         {/* ═════════════════════════════════════════════════════════════════════════
             PANEL 2: VOLUNTEER TABLET (Sarah Chen) - lg:col-span-3
             ═════════════════════════════════════════════════════════════════════════ */}
-        <section className="lg:col-span-3 bg-obsidian-card/45 border border-white/10 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl relative select-none shadow-lg">
+        <section className={`min-h-[580px] lg:min-h-0 lg:col-span-3 bg-obsidian-card/45 border border-white/10 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl relative select-none shadow-lg ${activeSimulatorTab === 'volunteer' ? 'flex' : 'hidden lg:flex'}`}>
           <div className="h-12 bg-white/5 border-b border-white/10 px-4 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-stadium-gold shadow-neon animate-pulse" />
@@ -601,7 +624,7 @@ export default function SimulatorSandbox() {
         {/* ═════════════════════════════════════════════════════════════════════════
             PANEL 3: OPERATIONS MISSION CONTROL (NASA) - lg:col-span-6
             ═════════════════════════════════════════════════════════════════════════ */}
-        <section className="lg:col-span-6 bg-obsidian-card/45 border border-white/10 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl relative select-none shadow-lg">
+        <section className={`min-h-[580px] lg:min-h-0 lg:col-span-6 bg-obsidian-card/45 border border-white/10 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl relative select-none shadow-lg ${activeSimulatorTab === 'command' ? 'flex' : 'hidden lg:flex'}`}>
           <div className="h-12 bg-white/5 border-b border-white/10 px-4 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-stadium-green shadow-neon animate-pulse" />
