@@ -1,106 +1,29 @@
 /**
  * agents.ts — Stadium OS 12-Agent Swarm Coordinator
  *
- * Implements in-browser reactive multi-agent loops, Capability Registry,
- * local queue event processor (claiming, retries, exponential backoffs, DLQ),
- * and the Emergency Authority Policy rules.
+ * Acts as the main entry point for the agent swarm.
+ * Core logic is split into focused modules:
+ *   - agentRegistry.ts  → 12-agent capability registry
+ *   - authorityPolicy.ts → emergency authority matrix & approval gate
+ *
+ * Implements: event processor (claiming, retries, exponential backoff, DLQ),
+ * and re-exports all public symbols for backward compatibility.
  */
 
-import { AgentEvent, AgentLog, Timestamp, Volunteer, Incident, Concession, Transit, stadiumNodes, NavigationMode } from '../mockData';
+import { AgentEvent, AgentLog, Volunteer, Incident, Concession, Transit, NavigationMode } from '../mockData';
 import { navigationAgent } from './navigationAgent';
-import { translateText } from './translationAgent';
-import { accessibilityModule } from '../modules/accessibilityModule';
 import { incidentService } from '../services/incidentService';
+import { calculateKPIs } from '../services/analyticsService';
+import { computeGreenScore } from '../services/sustainabilityService';
+
+// Re-export from focused modules for backward compatibility
+export { AgentInfo, agentSwarmRegistry } from './agentRegistry';
+export { emergencyAuthorityMatrix, isActionApprovalRequired, AuthorityActionKey } from './authorityPolicy';
 
 // ---------------------------------------------------------------------------
-// 12-AGENT REGISTRY & CAPABILITIES
+// LOCAL SIMULATED EVENT PROCESSING HEARTBEAT
+// (Registry and authority policy are in agentRegistry.ts / authorityPolicy.ts)
 // ---------------------------------------------------------------------------
-
-export interface AgentInfo {
-  name: string;
-  description: string;
-  capabilities: string[];
-}
-
-export const agentSwarmRegistry: Record<string, AgentInfo> = {
-  'Command Orchestrator': {
-    name: 'Command Orchestrator',
-    description: 'Central intent router, capability delegate, and human-in-the-loop coordinator.',
-    capabilities: ['orchestrate', 'route-intent', 'session-delegate']
-  },
-  'Vision Agent': {
-    name: 'Vision Agent',
-    description: 'Processes ticket scans, lost-child photos, crowd counting, and hazard OCR.',
-    capabilities: ['ocr-ticket', 'describe-photo', 'detect-smoke', 'count-crowd']
-  },
-  'Crowd Intelligence Agent': {
-    name: 'Crowd Intelligence Agent',
-    description: 'Monitors density heatmap zones, gate queues, and stampede risks.',
-    capabilities: ['predict-congestion', 'measure-queue', 'evaluate-stampede']
-  },
-  'Navigation Agent': {
-    name: 'Navigation Agent',
-    description: 'Dijkstra node graph navigation, landmark direction generator, and rerouting.',
-    capabilities: ['plot-route', 'landmark-directions', 'divert-route']
-  },
-  'Accessibility Agent': {
-    name: 'Accessibility Agent',
-    description: 'Handles step-free ramp routes, quiet zones, and WCAG alerts.',
-    capabilities: ['wheelchair-routing', 'neurodivergent-quiet-zones', 'wcag-alerting']
-  },
-  'Emergency Agent': {
-    name: 'Emergency Agent',
-    description: 'Responder for fire, medical, lost child, and evacuation dispatching.',
-    capabilities: ['evacuate', 'locate-aed', 'emergency-guidance', 'first-aid']
-  },
-  'Volunteer Agent': {
-    name: 'Volunteer Agent',
-    description: 'Dispatches nearby volunteers matching required skills.',
-    capabilities: ['dispatch-staff', 'match-volunteer', 'volunteer-roster']
-  },
-  'Translation Agent': {
-    name: 'Translation Agent',
-    description: 'Language translator and sign text interpreter.',
-    capabilities: ['translate-text', 'detect-language']
-  },
-  'Transport Agent': {
-    name: 'Transport Agent',
-    description: 'Coordinates metro countdowns, shuttles, and parking lot occupancy.',
-    capabilities: ['check-transit', 'check-parking', 'rideshare-surges']
-  },
-  'Sustainability Agent': {
-    name: 'Sustainability Agent',
-    description: 'Monitors carbon indicators, water efficiency, and electricity.',
-    capabilities: ['score-sustainability', 'optimize-utility']
-  },
-  'Analytics Agent': {
-    name: 'Analytics Agent',
-    description: 'Calculates response speeds, volunteer deployments, and KPI statistics.',
-    capabilities: ['calculate-response-time', 'volunteer-utilization', 'incident-trends']
-  },
-  'Fan Experience Agent': {
-    name: 'Fan Experience Agent',
-    description: 'Handles concessions menus, halftime queue times, and allergy checks.',
-    capabilities: ['place-food-order', 'allergen-screening', 'suggest-food']
-  }
-};
-
-// ---------------------------------------------------------------------------
-// AUTHORITY POLICY MATRIX
-// ---------------------------------------------------------------------------
-
-export const emergencyAuthorityMatrix = {
-  INCIDENT_NOTIFY: { auto: true, label: "Notify nearest volunteer & create incident" },
-  GUIDANCE_DISPLAY: { auto: true, label: "Display AED / First aid locator and exit arrows" },
-  STADIUM_ALARM: { auto: false, label: "Sound Stadium Audio/Visual Alarms" },
-  EVACUATION_ORDER: { auto: false, label: "Sound Stadium Evacuation Order" },
-  EXTERNAL_DISPATCH: { auto: false, label: "Dispatch External Emergency Services (Fire, Ambulance)" }
-};
-
-// Check if an action requires human approval
-export function isActionApprovalRequired(actionType: keyof typeof emergencyAuthorityMatrix): boolean {
-  return !emergencyAuthorityMatrix[actionType].auto;
-}
 
 // ---------------------------------------------------------------------------
 // LOCAL SIMULATED EVENT PROCESSING HEARTBEAT
@@ -347,6 +270,36 @@ export async function processLocalEvent(
         description,
         confidence: 0.98,
         expectedImpact: 'Contain incident, clear 400 fans via exit routes E1/E2.'
+      };
+    }
+
+    case 'KPI_REPORT': {
+      // Analytics Agent: compute live KPIs from current state
+      const kpis = calculateKPIs(dbState.agentLogs, dbState.incidents, dbState.volunteers);
+      return {
+        avgResponseTimeMinutes: kpis.avgResponseTimeMinutes,
+        incidentResolutionRate: kpis.incidentResolutionRate,
+        volunteerUtilizationPct: kpis.volunteerUtilizationPct,
+        totalEventsProcessed: kpis.totalEventsProcessed,
+        activeIncidentCount: kpis.activeIncidentCount,
+      };
+    }
+
+    case 'ENERGY_AUDIT': {
+      // Sustainability Agent: compute environmental score from current metrics
+      const metrics = payload.metrics;
+      if (!metrics) {
+        return { message: 'No sustainability metrics provided for ENERGY_AUDIT.' };
+      }
+      const greenScore = computeGreenScore(metrics);
+      return {
+        totalScore: greenScore.totalScore,
+        grade: greenScore.grade,
+        energyScore: greenScore.energyScore,
+        waterScore: greenScore.waterScore,
+        wasteScore: greenScore.wasteScore,
+        carbonScore: greenScore.carbonScore,
+        rationale: greenScore.rationale,
       };
     }
 
