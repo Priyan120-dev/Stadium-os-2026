@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import { useStadiumOS } from '../../context/StadiumOSContext';
+import { IncidentTimeline } from '../../components/IncidentTimeline';
 import { t } from '../../utils/translations';
 import {
   Tablet,
@@ -28,6 +29,7 @@ export default function VolunteerTabletPage() {
     incidents,
     resolveIncident,
     addAgentLog,
+    agentLogs,
     preferredLanguage
   } = useStadiumOS();
 
@@ -68,23 +70,33 @@ export default function VolunteerTabletPage() {
 
         <div className="flex-1 p-4 sm:p-6 flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-hidden">
           
-          {/* Left: Crew Selector */}
-          <div className="w-full md:w-1/3 flex flex-col gap-3 shrink-0">
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase">{t('vol.crew_roster', preferredLanguage)}</h3>
-            <div className="flex-1 space-y-2 overflow-y-auto">
-              {volunteers.map(v => (
-                <button
-                  key={v.id}
-                  onClick={() => setActiveVolId(v.id)}
-                  className={`w-full text-left p-3 rounded-xl border flex flex-col gap-1 transition-all duration-150 ${activeVolId === v.id ? 'bg-stadium-gold/15 border-stadium-gold text-white shadow-neon-gold' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs">{v.name}</span>
-                    <span className={`h-1.5 w-1.5 rounded-full ${v.status === 'available' ? 'bg-stadium-green' : 'bg-stadium-red animate-pulse'}`} />
-                  </div>
-                  <span className="text-[9px] text-slate-500">Zone: Concourse {v.zone.toUpperCase()}</span>
-                </button>
-              ))}
+          {/* Left: Crew Selector & Live Timeline */}
+          <div className="w-full md:w-1/3 flex flex-col gap-4 shrink-0 overflow-hidden">
+            <div className="flex-1 flex flex-col gap-2 min-h-0">
+              <h3 className="text-[10px] font-bold text-slate-500 uppercase">{t('vol.crew_roster', preferredLanguage)}</h3>
+              <div className="flex-1 space-y-2 overflow-y-auto">
+                {volunteers.map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => setActiveVolId(v.id)}
+                    className={`w-full text-left p-3 rounded-xl border flex flex-col gap-1 transition-all duration-150 ${activeVolId === v.id ? 'bg-stadium-gold/15 border-stadium-gold text-white shadow-neon-gold' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs">{v.name}</span>
+                      <span className={`h-1.5 w-1.5 rounded-full ${v.status === 'available' ? 'bg-stadium-green' : 'bg-stadium-red animate-pulse'}`} />
+                    </div>
+                    <span className="text-[9px] text-slate-500">Zone: Concourse {v.zone.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Live timeline panel */}
+            <div className="h-44 bg-white/3 border border-white/8 rounded-xl p-3 flex flex-col overflow-hidden shrink-0">
+              <div className="text-[9px] font-bold text-slate-500 uppercase mb-2">Live Timeline</div>
+              <div className="flex-1 overflow-y-auto">
+                <IncidentTimeline incidents={incidents} logs={agentLogs} maxItems={4} />
+              </div>
             </div>
           </div>
 

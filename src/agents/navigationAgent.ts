@@ -3,15 +3,81 @@
  * 
  * Performs graph search (Dijkstra) over the stadium node graph
  * and generates Turn-by-Turn landmark instructions.
+ * Now supports NavigationMode for adaptive routing.
  */
 
-import { stadiumGraph, stadiumNodes } from '../mockData';
+import { stadiumGraph, stadiumNodes, NavigationMode } from '../mockData';
 import { accessibilityModule } from '../modules/accessibilityModule';
 
 export interface RouteReport {
   path: string[];
   distance: number;
   instructions: string[];
+  mode: NavigationMode;
+}
+
+/**
+ * Returns a per-edge weight multiplier based on the selected navigation mode.
+ * This allows the same Dijkstra algorithm to produce different optimal paths.
+ */
+function getModeWeight(neighbor: string, baseWeight: number, mode: NavigationMode, densityMap?: Record<string, string>): number {
+  let weight = baseWeight;
+
+  switch (mode) {
+    case 'wheelchair':
+      // Heavily penalize stairs (Sec102, Sec106, Sec114 are not step-free per map annotations)
+      if (['Sec102', 'Sec106', 'Sec114'].includes(neighbor)) weight += 1000;
+      // Prefer exits and medical which have ramp access
+      if (neighbor.startsWith('E') || neighbor.startsWith('M')) weight *= 0.5;
+      // Sections with ramps (inner concourse)
+      if (neighbor.startsWith('R') || neighbor.startsWith('AED')) weight *= 0.8;
+      break;
+
+    case 'vip':
+      // VIP lounge is near food courts — strongly prefer food courts & exits
+      if (neighbor.startsWith('F')) weight *= 0.2;
+      if (neighbor.startsWith('E')) weight *= 0.3;
+      // Deprioritize crowded gate areas
+      if (neighbor.startsWith('Gate')) weight *= 2;
+      break;
+
+    case 'least-crowded':
+      // Penalize high-density nodes
+      if (densityMap) {
+        const density = densityMap[neighbor];
+        if (density === 'critical') weight *= 8;
+        else if (density === 'high')     weight *= 4;
+        else if (density === 'medium')   weight *= 2;
+      }
+      break;
+
+    case 'emergency':
+      // Minimize all weights — direct shortest path, ignoring crowd
+      weight *= 0.3;
+      // Prioritize medical and AED stations
+      if (neighbor.startsWith('M') || neighbor.startsWith('AED')) weight *= 0.1;
+      break;
+
+    case 'exit':
+      // Guide toward exit nodes
+      if (neighbor.startsWith('E')) weight *= 0.1;
+      if (neighbor.startsWith('Gate')) weight *= 0.2;
+      // Penalize going deeper into sections
+      if (neighbor.startsWith('Sec')) weight *= 1.5;
+      break;
+
+    case 'volunteer':
+      // Volunteers traverse via concourses, prefer food courts and restrooms
+      if (neighbor.startsWith('F') || neighbor.startsWith('R')) weight *= 0.5;
+      break;
+
+    case 'fastest':
+    default:
+      // No modification — pure Dijkstra
+      break;
+  }
+
+  return weight;
 }
 
 export const navigationAgent = {
@@ -24,12 +90,23 @@ export const navigationAgent = {
    * @param startNode - ID of start node.
    * @param endNode - ID of end node.
    * @param stepFree - If true, avoids stairs or matches accessible nodes.
+   * @param mode - NavigationMode determining edge weight biases.
+   * @param densityMap - Optional density map for least-crowded routing.
    * @returns RouteReport
    */
-  findRoute(startNode: string, endNode: string, stepFree = false): RouteReport {
+  findRoute(
+    startNode: string,
+    endNode: string,
+    stepFree = false,
+    mode: NavigationMode = 'fastest',
+    densityMap?: Record<string, string>
+  ): RouteReport {
     if (!stadiumNodes[startNode] || !stadiumNodes[endNode]) {
-      return { path: [], distance: 0, instructions: ['Invalid start or destination location.'] };
+      return { path: [], distance: 0, instructions: ['Invalid start or destination location.'], mode };
     }
+
+    // Force wheelchair mode if stepFree is requested
+    const effectiveMode: NavigationMode = stepFree ? 'wheelchair' : mode;
 
     const distances: Record<string, number> = {};
     const previous: Record<string, string | null> = {};
@@ -57,18 +134,12 @@ export const navigationAgent = {
 
         let weight = neighbors[neighbor];
 
-        // Step-free filter: penalize inaccessible sections heavily
-        if (stepFree && !accessibilityModule.isNodeAccessible(neighbor)) {
-          weight += 1000; // Large penalty to avoid steps/non-accessible sections
-        }
+        // Mode-specific edge weight biasing
+        weight = getModeWeight(neighbor, weight, effectiveMode, densityMap);
 
-        // Accessibility weights: prioritize ramps/elevators if step-free is requested
-        if (stepFree) {
-          const isRampOrElevator = neighbor.startsWith('E') || neighbor.startsWith('M');
-          if (!isRampOrElevator && neighbor.includes('Sec')) {
-            // Add a small penalty to simulate prioritizing outer concourses over narrow seating sections
-            weight += 2;
-          }
+        // Legacy step-free filter (still works in non-wheelchair modes)
+        if (stepFree && !accessibilityModule.isNodeAccessible(neighbor)) {
+          weight += 1000;
         }
 
         const alt = distances[current] + weight;
@@ -88,25 +159,37 @@ export const navigationAgent = {
     }
 
     if (path[0] !== startNode) {
-      return { path: [], distance: 0, instructions: ['No valid path found. Please contact a stadium volunteer.'] };
+      return { path: [], distance: 0, instructions: ['No valid path found. Please contact a stadium volunteer.'], mode: effectiveMode };
     }
 
-    // Generate natural language instructions based on nodes visited
-    const instructions = this.generateInstructions(path, stepFree);
+    const instructions = this.generateInstructions(path, stepFree, effectiveMode);
 
     return {
       path,
       distance: distances[endNode],
-      instructions
+      instructions,
+      mode: effectiveMode
     };
   },
 
   /**
    * Generate turn-by-turn guidance notes based on path nodes.
    */
-  generateInstructions(path: string[], stepFree: boolean): string[] {
+  generateInstructions(path: string[], stepFree: boolean, mode: NavigationMode = 'fastest'): string[] {
     const instructions: string[] = [];
     if (path.length === 0) return instructions;
+
+    const modeNote = {
+      wheelchair:    '♿ Step-free route selected.',
+      vip:           '👑 VIP route — priority access via food courts.',
+      'least-crowded': '🌬️ Quiet route — avoiding dense areas.',
+      emergency:     '🚨 Emergency fast-track route.',
+      exit:          '🚪 Guided exit route.',
+      volunteer:     '🦺 Staff concourse route.',
+      fastest:       '',
+    }[mode] || '';
+
+    if (modeNote) instructions.push(modeNote);
     
     instructions.push(`Start walking from ${stadiumNodes[path[0]].label}.`);
 
@@ -142,3 +225,4 @@ export const navigationAgent = {
     return instructions;
   }
 };
+

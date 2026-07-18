@@ -6,7 +6,7 @@
  * and the Emergency Authority Policy rules.
  */
 
-import { AgentEvent, AgentLog, Timestamp, Volunteer, Incident, Concession, Transit, stadiumNodes } from '../mockData';
+import { AgentEvent, AgentLog, Timestamp, Volunteer, Incident, Concession, Transit, stadiumNodes, NavigationMode } from '../mockData';
 import { navigationAgent } from './navigationAgent';
 import { translateText } from './translationAgent';
 import { accessibilityModule } from '../modules/accessibilityModule';
@@ -125,6 +125,8 @@ export async function processLocalEvent(
     stepFree: boolean;
     setEvents: React.Dispatch<React.SetStateAction<AgentEvent[]>>;
     addAlert: (alert: any) => void;
+    navigationMode?: NavigationMode;
+    densityMap?: Record<string, 'low' | 'medium' | 'high' | 'critical'>;
   }
 ): Promise<Record<string, any>> {
   const { eventType, payload } = event;
@@ -164,8 +166,9 @@ export async function processLocalEvent(
       const start = payload.start || 'GateA';
       const end = payload.end || 'Sec104';
       const stepFree = payload.stepFree || false;
+      const mode = payload.mode || dbState.navigationMode || 'fastest';
 
-      const route = navigationAgent.findRoute(start, end, stepFree);
+      const route = navigationAgent.findRoute(start, end, stepFree, mode, dbState.densityMap);
       dbState.setHighlightedPath(route.path);
 
       return {

@@ -1,14 +1,10 @@
-/**
- * page.tsx — Dedicated Fan Mobile Companion App
- *
- * Provides a mobile frame view optimized for smartphones.
- */
-
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useStadiumOS } from '../../context/StadiumOSContext';
 import StadiumMap from '../../components/StadiumMap';
+import { RouteTypeSelector } from '../../components/RouteTypeSelector';
+import { navigationAgent } from '../../agents/navigationAgent';
 import { copilotEngine, ChatMessage } from '../../agents/copilotEngine';
 import { t } from '../../utils/translations';
 import {
@@ -47,7 +43,8 @@ export default function FanCompanionPage() {
     setDemoState,
     addEvent,
     addAgentLog,
-    addAlert
+    addAlert,
+    navigationMode
   } = useStadiumOS();
 
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -90,7 +87,7 @@ export default function FanCompanionPage() {
       setScanLoading(false);
       setScanDone(true);
 
-      const routeReport = navigationAgent.findRoute('Sec104', 'GateB', stepFree);
+      const routeReport = navigationAgent.findRoute('Sec104', 'GateB', stepFree, navigationMode, densityMap);
       setHighlightedPath(routeReport.path);
 
       const reply = preferredLanguage === 'es'
@@ -302,8 +299,16 @@ export default function FanCompanionPage() {
                 />
               </div>
 
+              {/* Route Mode Selector */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col gap-2 shrink-0">
+                <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Route Optimization Mode</div>
+                <div className="overflow-x-auto tab-bar-scroll">
+                  <RouteTypeSelector compact />
+                </div>
+              </div>
+
               {/* Step free checkbox toggle */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between text-xs select-none">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between text-xs select-none shrink-0">
                 <div className="flex items-center gap-2">
                   <Compass className={`h-4 w-4 ${stepFree ? 'text-stadium-blue' : 'text-slate-500'}`} />
                   <div>
@@ -390,14 +395,3 @@ export default function FanCompanionPage() {
     </div>
   );
 }
-
-// Simulated navigation lookup bypass
-const navigationAgent = {
-  findRoute(start: string, end: string, stepFree: boolean) {
-    const penaltyNodes = stepFree ? ['Sec101', 'GateB'] : ['Sec101', 'Sec102', 'Sec103', 'GateB'];
-    return {
-      path: ['GateB', ...penaltyNodes, 'Sec104'],
-      instructions: []
-    };
-  }
-};

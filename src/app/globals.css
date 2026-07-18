@@ -1091,3 +1091,111 @@ h1, h2, h3, h4, h5, h6 {
     stroke-dashoffset: 0 !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────
+   NEW KEYFRAMES — Phase 5 Upgrade
+   ───────────────────────────────────────────────────────── */
+
+/* Shimmer for skeleton loaders */
+@keyframes shimmer-wave {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Slide-in from left for event bus items */
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Slide-in from bottom for toast-like panels */
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse border for critical approval gate */
+@keyframes pulse-border {
+  0%, 100% { border-color: rgba(255, 23, 68, 0.5); box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.3); }
+  50%       { border-color: rgba(255, 23, 68, 0.9); box-shadow: 0 0 12px 4px rgba(255, 23, 68, 0.2); }
+}
+
+/* Health bar fill animation */
+@keyframes health-bar-fill {
+  from { width: 0%; }
+  to   { width: var(--health, 100%); }
+}
+
+/* ─────────────────────────────────────────────────────────
+   UTILITY CLASSES
+   ───────────────────────────────────────────────────────── */
+
+/* Skeleton shimmer */
+.animate-shimmer {
+  background: rgba(255, 255, 255, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer-wave {
+  animation: shimmer-wave 1.6s ease-in-out infinite;
+}
+
+/* Slide animations */
+.animate-slide-in-left {
+  animation: slide-in-left 0.25s ease-out both;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.3s ease-out both;
+}
+
+/* Critical approval gate pulse */
+.animate-pulse-border {
+  animation: pulse-border 1.2s ease-in-out infinite;
+}
+
+/* Agent card hover enhancement */
+.agent-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.agent-card-hover:hover {
+  transform: scale(1.01);
+}
+
+/* Stadium blue (var for tailwind extension) */
+.text-stadium-blue  { color: #00b0ff; }
+.bg-stadium-blue    { background-color: #00b0ff; }
+.border-stadium-blue { border-color: #00b0ff; }
+.shadow-neon-blue   { box-shadow: 0 0 15px rgba(0, 176, 255, 0.20); }
+
+/* Reduced opacity background variants */
+.bg-stadium-blue\/8  { background-color: rgba(0, 176, 255, 0.08); }
+.bg-stadium-blue\/10 { background-color: rgba(0, 176, 255, 0.10); }
+.bg-stadium-blue\/15 { background-color: rgba(0, 176, 255, 0.15); }
+.border-stadium-blue\/20 { border-color: rgba(0, 176, 255, 0.20); }
+.border-stadium-blue\/25 { border-color: rgba(0, 176, 255, 0.25); }
+.border-stadium-blue\/40 { border-color: rgba(0, 176, 255, 0.40); }
+
+/* Tab bar smooth scroll on mobile */
+.tab-bar-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* KPI card glow states */
+.hover\:shadow-neon-blue:hover { box-shadow: 0 0 20px rgba(0, 176, 255, 0.20); }
+.hover\:shadow-neon-green:hover { box-shadow: 0 0 20px rgba(0, 230, 118, 0.25); }
+.hover\:shadow-neon-gold:hover  { box-shadow: 0 0 20px rgba(255, 215, 0, 0.20); }
+.hover\:shadow-neon-red:hover   { box-shadow: 0 0 20px rgba(255, 23, 68, 0.30); }
+.hover\:shadow-neon-amber:hover { box-shadow: 0 0 20px rgba(255, 109, 0, 0.25); }
+
+/* Ticket scan animation */
+@keyframes scan-sweep {
+  0%   { top: 0%; opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.animate-scan-sweep {
+  animation: scan-sweep 1.5s ease-in-out infinite;
+}

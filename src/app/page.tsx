@@ -147,6 +147,21 @@ export default function RoleSelectorPage() {
           </div>
         </div>
 
+        {/* Live statistics ticker bar */}
+        <div className="w-full mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/3 border border-white/8 rounded-2xl p-4 backdrop-blur-md">
+          {[
+            { label: 'Swarm Agents', value: 12, unit: 'ONLINE', color: 'text-stadium-green' },
+            { label: 'Active Swarm Bus', value: '4.2k', unit: 'EPS', color: 'text-stadium-blue' },
+            { label: 'Throughput', value: '8.5k', unit: 'FANS/HR', color: 'text-stadium-gold' },
+            { label: 'Response Latency', value: '44', unit: 'MS', color: 'text-stadium-green' },
+          ].map(stat => (
+            <div key={stat.label} className="text-center">
+              <div className={`font-display font-extrabold text-2xl ${stat.color}`}>{stat.value}</div>
+              <div className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{stat.label} · {stat.unit}</div>
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   );

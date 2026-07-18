@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   User,
   Ticket,
@@ -19,6 +19,8 @@ import {
   AgentEvent,
   AgentLog,
   SustainabilityMetrics,
+  AgentMetric,
+  NavigationMode,
   initialUsers,
   initialTickets,
   initialIncidents,
@@ -30,6 +32,7 @@ import {
   initialAlerts,
   INITIAL_AGENT_LOGS,
   initialParkingLots,
+  initialAgentMetrics,
   OCCUPANCY_TEXT
 } from '../mockData';
 import { processLocalEvent } from '../agents/agents';
@@ -49,6 +52,7 @@ export interface StadiumOSContextType {
   sustainability: SustainabilityMetrics;
   densityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'>;
   parkingLots: typeof initialParkingLots;
+  agentMetrics: Record<string, AgentMetric>;
 
   // Configuration States
   activeUser: User;
@@ -60,6 +64,8 @@ export interface StadiumOSContextType {
   setHighlightedPath: (path: string[]) => void;
   demoState: string;
   setDemoState: (state: string) => void;
+  navigationMode: NavigationMode;
+  setNavigationMode: (mode: NavigationMode) => void;
 
   // Actions
   addEvent: (eventType: string, payload: Record<string, any>, source: string, target: string, priority?: 'low' | 'medium' | 'high' | 'critical', correlationId?: string) => string;
@@ -68,6 +74,7 @@ export interface StadiumOSContextType {
   resolveIncident: (incidentId: string, volunteerId: string) => void;
   approveCriticalAction: (eventId: string) => void;
   rejectCriticalAction: (eventId: string) => void;
+  updateAgentMetric: (agentName: string, update: Partial<AgentMetric>) => void;
   resetDemo: () => void;
 }
 
@@ -95,8 +102,17 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
   const [highlightedPath, setHighlightedPath] = useState<string[]>([]);
   const [demoState, setDemoState] = useState<string>('ready');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [agentMetrics, setAgentMetrics] = useState<Record<string, AgentMetric>>(initialAgentMetrics);
+  const [navigationMode, setNavigationMode] = useState<NavigationMode>('fastest');
 
   const activeUser = users['USR-001'] || initialUsers['USR-001'];
+
+  const updateAgentMetric = useCallback((agentName: string, update: Partial<AgentMetric>) => {
+    setAgentMetrics(prev => ({
+      ...prev,
+      [agentName]: { ...prev[agentName], ...update, lastActiveAt: Date.now() }
+    }));
+  }, []);
 
   // --- CLIENT-SIDE LOCALSTORAGE HYDRATION ---
   useEffect(() => {
@@ -360,6 +376,21 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
       lastUpdated: Date.now()
     } : e));
 
+    // Update agent metrics to busy status
+    setAgentMetrics(prev => {
+      const agent = prev[eventToProcess.targetAgent];
+      if (!agent) return prev;
+      return {
+        ...prev,
+        [eventToProcess.targetAgent]: {
+          ...agent,
+          status: 'busy',
+          currentTask: `Processing: ${eventToProcess.eventType}`,
+          lastActiveAt: Date.now()
+        }
+      };
+    });
+
     addAgentLog('Event Bus', 'Simulated Worker', `Simulated claiming task: "${eventToProcess.eventType}" [Lease locked]`, 'info', eventToProcess.correlationId);
 
     // Run agent execution loop
@@ -376,17 +407,46 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
       setHighlightedPath,
       stepFree,
       setEvents: setAgentEvents,
-      addAlert
+      addAlert,
+      navigationMode,
+      densityMap
     })
       .then(result => {
+        const completedTime = Date.now();
         // Resolve successfully
         setAgentEvents(prev => prev.map(e => e.eventId === eventToProcess.eventId ? {
           ...e,
           status: 'completed',
-          completedAt: Date.now(),
-          lastUpdated: Date.now(),
+          completedAt: completedTime,
+          lastUpdated: completedTime,
           result
         } : e));
+
+        // Update agent metrics to online/idle with performance changes
+        setAgentMetrics(prev => {
+          const agent = prev[eventToProcess.targetAgent];
+          if (!agent) return prev;
+          const latency = completedTime - (eventToProcess.startedAt || eventToProcess.createdAt);
+          const newProcessed = agent.performance.totalEventsProcessed + 1;
+          const newAvg = Math.round((agent.performance.avgResponseMs * agent.performance.totalEventsProcessed + latency) / newProcessed);
+          return {
+            ...prev,
+            [eventToProcess.targetAgent]: {
+              ...agent,
+              status: 'online',
+              currentTask: null,
+              confidenceScore: Math.min(1.0, 0.9 + Math.random() * 0.1),
+              processingTimeMs: latency,
+              lastActiveAt: completedTime,
+              performance: {
+                ...agent.performance,
+                totalEventsProcessed: newProcessed,
+                avgResponseMs: newAvg,
+                eventsLast5Min: agent.performance.eventsLast5Min + 1
+              }
+            }
+          };
+        });
 
         addAgentLog(
           eventToProcess.targetAgent,
@@ -401,16 +461,37 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
         // Handle failure retry backoff / Dead Letter Queue (DLQ)
         const nextRetryCount = eventToProcess.retryCount + 1;
         const failed = nextRetryCount > eventToProcess.maxRetries;
+        const failedTime = Date.now();
 
         setAgentEvents(prev => prev.map(e => e.eventId === eventToProcess.eventId ? {
           ...e,
           status: failed ? 'failed' : 'queued',
           retryCount: nextRetryCount,
           errorMessage: error.message || 'Worker processing error',
-          deadLetteredAt: failed ? Date.now() : null,
-          scheduledRetryAt: failed ? null : Date.now() + Math.pow(1.5, nextRetryCount) * 5000,
-          lastUpdated: Date.now()
+          deadLetteredAt: failed ? failedTime : null,
+          scheduledRetryAt: failed ? null : failedTime + Math.pow(1.5, nextRetryCount) * 5000,
+          lastUpdated: failedTime
         } : e));
+
+        // Update agent metrics on error/retry
+        setAgentMetrics(prev => {
+          const agent = prev[eventToProcess.targetAgent];
+          if (!agent) return prev;
+          return {
+            ...prev,
+            [eventToProcess.targetAgent]: {
+              ...agent,
+              status: failed ? 'error' : 'online',
+              currentTask: failed ? `DLQ Error: ${error.message || 'Processing failed'}` : null,
+              health: Math.max(20, agent.health - (failed ? 15 : 5)),
+              lastActiveAt: failedTime,
+              performance: {
+                ...agent.performance,
+                successRate: Math.max(0.5, (agent.performance.successRate * 9) / 10)
+              }
+            }
+          };
+        });
 
         if (failed) {
           addAgentLog(
@@ -446,6 +527,8 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
     setAgentEvents([]);
     setAgentLogs(INITIAL_AGENT_LOGS);
     setSustainability(initialSustainability);
+    setAgentMetrics(initialAgentMetrics);
+    setNavigationMode('fastest');
     setPreferredLanguageState('en');
     setStepFreeState(false);
     setHighlightedPath([]);
@@ -467,6 +550,7 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
       sustainability,
       densityMap,
       parkingLots,
+      agentMetrics,
       activeUser,
       stepFree,
       setStepFree,
@@ -476,12 +560,15 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
       setHighlightedPath,
       demoState,
       setDemoState,
+      navigationMode,
+      setNavigationMode,
       addEvent,
       addAgentLog,
       addAlert,
       resolveIncident,
       approveCriticalAction,
       rejectCriticalAction,
+      updateAgentMetric,
       resetDemo
     }}>
       {children}

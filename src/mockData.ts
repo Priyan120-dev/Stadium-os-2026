@@ -508,3 +508,238 @@ export const initialParkingLots = {
   'LOT-B': { id: 'LOT-B', name: 'Lot B (East)',  capacity: 800,  occupied: 480,  status: 'available' },
   'LOT-C': { id: 'LOT-C', name: 'Lot C (South)', capacity: 900,  occupied: 720,  status: 'moderate'  },
 };
+
+// ---------------------------------------------------------------------------
+// NAVIGATION MODE
+// ---------------------------------------------------------------------------
+export type NavigationMode = 'fastest' | 'least-crowded' | 'wheelchair' | 'vip' | 'emergency' | 'volunteer' | 'exit';
+
+// ---------------------------------------------------------------------------
+// AGENT METRIC TYPES & INITIAL STATE
+// ---------------------------------------------------------------------------
+export interface AgentPerformanceMetric {
+  avgResponseMs: number;
+  successRate: number;  // 0–1
+  totalEventsProcessed: number;
+  eventsLast5Min: number;
+}
+
+export interface AgentMetric {
+  name: string;
+  status: 'online' | 'busy' | 'idle' | 'error' | 'offline';
+  health: number;          // 0–100
+  currentTask: string | null;
+  confidenceScore: number; // 0–1
+  processingTimeMs: number;
+  lastActiveAt: number;
+  capabilities: string[];
+  recentEventIds: string[];
+  performance: AgentPerformanceMetric;
+  color: string;           // neon accent color for the card
+}
+
+export const initialAgentMetrics: Record<string, AgentMetric> = {
+  'Command Orchestrator': {
+    name: 'Command Orchestrator',
+    status: 'online',
+    health: 100,
+    currentTask: 'Routing intent from Fan App query',
+    confidenceScore: 0.98,
+    processingTimeMs: 42,
+    lastActiveAt: Date.now() - 1200,
+    capabilities: ['orchestrate', 'route-intent', 'session-delegate'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 44, successRate: 0.99, totalEventsProcessed: 3821, eventsLast5Min: 12 },
+    color: '#00e676',
+  },
+  'Vision Agent': {
+    name: 'Vision Agent',
+    status: 'idle',
+    health: 97,
+    currentTask: null,
+    confidenceScore: 0.94,
+    processingTimeMs: 210,
+    lastActiveAt: Date.now() - 45000,
+    capabilities: ['ocr-ticket', 'describe-photo', 'detect-smoke', 'count-crowd'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 212, successRate: 0.96, totalEventsProcessed: 284, eventsLast5Min: 0 },
+    color: '#00b0ff',
+  },
+  'Crowd Intelligence Agent': {
+    name: 'Crowd Intelligence Agent',
+    status: 'busy',
+    health: 99,
+    currentTask: 'Monitoring Gate A — critical density threshold',
+    confidenceScore: 0.91,
+    processingTimeMs: 88,
+    lastActiveAt: Date.now() - 500,
+    capabilities: ['predict-congestion', 'measure-queue', 'evaluate-stampede'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 91, successRate: 0.98, totalEventsProcessed: 1102, eventsLast5Min: 8 },
+    color: '#ffd700',
+  },
+  'Navigation Agent': {
+    name: 'Navigation Agent',
+    status: 'online',
+    health: 100,
+    currentTask: 'Dijkstra route computed: GateA → Sec104',
+    confidenceScore: 1.0,
+    processingTimeMs: 6,
+    lastActiveAt: Date.now() - 3000,
+    capabilities: ['plot-route', 'landmark-directions', 'divert-route'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 7, successRate: 1.0, totalEventsProcessed: 5644, eventsLast5Min: 4 },
+    color: '#00e676',
+  },
+  'Accessibility Agent': {
+    name: 'Accessibility Agent',
+    status: 'online',
+    health: 98,
+    currentTask: null,
+    confidenceScore: 0.99,
+    processingTimeMs: 18,
+    lastActiveAt: Date.now() - 20000,
+    capabilities: ['wheelchair-routing', 'neurodivergent-quiet-zones', 'wcag-alerting'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 19, successRate: 0.99, totalEventsProcessed: 423, eventsLast5Min: 1 },
+    color: '#00b0ff',
+  },
+  'Emergency Agent': {
+    name: 'Emergency Agent',
+    status: 'online',
+    health: 100,
+    currentTask: 'Standby — no active emergencies',
+    confidenceScore: 0.97,
+    processingTimeMs: 55,
+    lastActiveAt: Date.now() - 480000,
+    capabilities: ['evacuate', 'locate-aed', 'emergency-guidance', 'first-aid'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 58, successRate: 0.97, totalEventsProcessed: 62, eventsLast5Min: 0 },
+    color: '#ff1744',
+  },
+  'Volunteer Agent': {
+    name: 'Volunteer Agent',
+    status: 'online',
+    health: 98,
+    currentTask: 'Roster sync: 3 volunteers available',
+    confidenceScore: 0.95,
+    processingTimeMs: 30,
+    lastActiveAt: Date.now() - 5000,
+    capabilities: ['dispatch-staff', 'match-volunteer', 'volunteer-roster'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 32, successRate: 0.96, totalEventsProcessed: 318, eventsLast5Min: 2 },
+    color: '#00e676',
+  },
+  'Translation Agent': {
+    name: 'Translation Agent',
+    status: 'online',
+    health: 100,
+    currentTask: null,
+    confidenceScore: 0.99,
+    processingTimeMs: 12,
+    lastActiveAt: Date.now() - 2000,
+    capabilities: ['translate-text', 'detect-language'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 14, successRate: 1.0, totalEventsProcessed: 2241, eventsLast5Min: 3 },
+    color: '#ffd700',
+  },
+  'Transport Agent': {
+    name: 'Transport Agent',
+    status: 'online',
+    health: 94,
+    currentTask: 'NJ Transit — monitoring delay buffer',
+    confidenceScore: 0.88,
+    processingTimeMs: 140,
+    lastActiveAt: Date.now() - 15000,
+    capabilities: ['check-transit', 'check-parking', 'rideshare-surges'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 145, successRate: 0.91, totalEventsProcessed: 882, eventsLast5Min: 1 },
+    color: '#00b0ff',
+  },
+  'Sustainability Agent': {
+    name: 'Sustainability Agent',
+    status: 'idle',
+    health: 100,
+    currentTask: null,
+    confidenceScore: 0.96,
+    processingTimeMs: 220,
+    lastActiveAt: Date.now() - 60000,
+    capabilities: ['score-sustainability', 'optimize-utility'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 225, successRate: 0.98, totalEventsProcessed: 144, eventsLast5Min: 0 },
+    color: '#00e676',
+  },
+  'Analytics Agent': {
+    name: 'Analytics Agent',
+    status: 'busy',
+    health: 99,
+    currentTask: 'Aggregating fan satisfaction KPIs',
+    confidenceScore: 0.93,
+    processingTimeMs: 310,
+    lastActiveAt: Date.now() - 8000,
+    capabilities: ['calculate-response-time', 'volunteer-utilization', 'incident-trends'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 315, successRate: 0.94, totalEventsProcessed: 732, eventsLast5Min: 3 },
+    color: '#ffd700',
+  },
+  'Fan Experience Agent': {
+    name: 'Fan Experience Agent',
+    status: 'online',
+    health: 97,
+    currentTask: 'AI Copilot session active — Mateo García',
+    confidenceScore: 0.92,
+    processingTimeMs: 180,
+    lastActiveAt: Date.now() - 1000,
+    capabilities: ['place-food-order', 'allergen-screening', 'suggest-food'],
+    recentEventIds: [],
+    performance: { avgResponseMs: 184, successRate: 0.95, totalEventsProcessed: 1488, eventsLast5Min: 6 },
+    color: '#00b0ff',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// CROWD FORECAST DATA
+// ---------------------------------------------------------------------------
+export interface GateUtilization {
+  gateId: string;
+  label: string;
+  utilization: number; // 0–100 %
+  throughputPerHour: number;
+  trend: 'rising' | 'falling' | 'stable';
+}
+
+export interface HourlyArrival {
+  hour: string;
+  count: number;
+}
+
+export const initialGateUtilization: GateUtilization[] = [
+  { gateId: 'GateA', label: 'Gate A', utilization: 97, throughputPerHour: 3200, trend: 'rising' },
+  { gateId: 'GateB', label: 'Gate B', utilization: 42, throughputPerHour: 1800, trend: 'stable' },
+  { gateId: 'GateC', label: 'Gate C', utilization: 68, throughputPerHour: 2400, trend: 'falling' },
+  { gateId: 'GateD', label: 'Gate D', utilization: 33, throughputPerHour: 1100, trend: 'stable' },
+];
+
+export const initialHourlyArrivals: HourlyArrival[] = [
+  { hour: '15:00', count: 2100 },
+  { hour: '16:00', count: 8400 },
+  { hour: '17:00', count: 18200 },
+  { hour: '18:00', count: 24800 },
+  { hour: '19:00', count: 14200 },
+  { hour: '20:00', count: 5100 },
+  { hour: '21:00', count: 1800 },
+  { hour: '22:00', count: 1820 },
+];
+
+// Executive KPI data
+export const initialKPIs = {
+  aiResponseMs: 44,
+  incidentsResolved: 18,
+  incidentsActive: 2,
+  volunteerUtilization: 67,
+  fanSatisfaction: 94,
+  gateThroughput: 8500,
+  transportOnTime: 88,
+  avgWalkTimeMin: 4.2,
+};
+
