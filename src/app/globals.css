@@ -1180,7 +1180,6 @@ h1, h2, h3, h4, h5, h6 {
 /* Tab bar smooth scroll on mobile */
 .tab-bar-scroll {
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* KPI card glow states */
