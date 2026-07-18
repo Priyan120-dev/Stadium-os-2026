@@ -17,8 +17,14 @@ import { calculateKPIs } from '../services/analyticsService';
 import { computeGreenScore } from '../services/sustainabilityService';
 
 // Re-export from focused modules for backward compatibility
-export { AgentInfo, agentSwarmRegistry } from './agentRegistry';
-export { emergencyAuthorityMatrix, isActionApprovalRequired, AuthorityActionKey } from './authorityPolicy';
+import { agentSwarmRegistry } from './agentRegistry';
+import type { AgentInfo } from './agentRegistry';
+export type { AgentInfo } from './agentRegistry';
+export { agentSwarmRegistry } from './agentRegistry';
+import { emergencyAuthorityMatrix, isActionApprovalRequired } from './authorityPolicy';
+import type { AuthorityActionKey } from './authorityPolicy';
+export type { AuthorityActionKey } from './authorityPolicy';
+export { emergencyAuthorityMatrix, isActionApprovalRequired } from './authorityPolicy';
 
 // ---------------------------------------------------------------------------
 // LOCAL SIMULATED EVENT PROCESSING HEARTBEAT
@@ -307,3 +313,4 @@ export async function processLocalEvent(
       return { message: `Simulated worker resolved event: ${eventType}` };
   }
 }
+
