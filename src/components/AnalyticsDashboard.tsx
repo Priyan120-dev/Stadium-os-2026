@@ -117,6 +117,69 @@ export const AnalyticsDashboard = React.memo(function AnalyticsDashboard() {
         />
       </div>
 
+      {/* Stadium Health Dial Gauge & Sustainability Indices */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+        {/* Dial Gauge */}
+        <div className="md:col-span-1 bg-obsidian-card/45 border border-white/8 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+          <span className="text-[10px] font-bold text-slate-400 uppercase mb-3">Stadium Health Score</span>
+          <div className="relative h-28 w-28 flex items-center justify-center">
+            {/* Background Circle */}
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100" aria-label="Stadium health score dial gauge">
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="#1e293b"
+                strokeWidth="8"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="#00e676"
+                strokeWidth="8"
+                strokeDasharray="251.2"
+                strokeDashoffset={251.2 - (251.2 * 98) / 100}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+                style={{ filter: 'drop-shadow(0 0 6px #00e67680)' }}
+              />
+            </svg>
+            <div className="absolute flex flex-col items-center justify-center">
+              <span className="text-3xl font-extrabold text-white">98</span>
+              <span className="text-[8px] font-mono text-stadium-green uppercase font-bold tracking-widest">OPTIMAL</span>
+            </div>
+          </div>
+        </div>
+
+        {/* EOC Trust Metrics */}
+        <div className="md:col-span-2 bg-obsidian-card/45 border border-white/8 rounded-2xl p-4 flex flex-col justify-between">
+          <span className="text-[10px] font-bold text-slate-400 uppercase mb-2">EOC Reliability Matrix</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/3 border border-white/5 rounded-xl p-3 flex flex-col justify-between">
+              <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">AI Decision Trust</span>
+              <div className="flex justify-between items-baseline mt-1">
+                <span className="text-xl font-extrabold text-stadium-blue">98.9%</span>
+                <span className="text-[8px] text-stadium-green font-bold">Stable</span>
+              </div>
+            </div>
+            <div className="bg-white/3 border border-white/5 rounded-xl p-3 flex flex-col justify-between">
+              <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Active Threat Level</span>
+              <div className="flex justify-between items-baseline mt-1">
+                <span className="text-xl font-extrabold text-stadium-green">LOW</span>
+                <span className="text-[8px] text-slate-500 font-bold">Grade AA</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 text-[10px] text-slate-400 leading-normal flex items-start gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-stadium-green mt-1 shrink-0" />
+            <span>Continuous verification checks report zero network congestion or sensor failure anomalies across MetLife sectors.</span>
+          </div>
+        </div>
+      </div>
+
       {/* Sparkline row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 shrink-0">
         {/* Fan satisfaction trend */}

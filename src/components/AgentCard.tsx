@@ -61,19 +61,49 @@ export const AgentCard = React.memo(function AgentCard({ metric }: AgentCardProp
       </div>
 
       {/* Confidence + Processing Time */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1 bg-white/5 border border-white/8 rounded-lg px-2.5 py-1.5">
-          <div className="text-[8px] text-slate-500 font-semibold uppercase">Confidence</div>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="bg-white/5 border border-white/8 rounded-lg px-2 py-1">
+          <div className="text-[7px] text-slate-500 font-semibold uppercase">Confidence</div>
           <div className="text-xs font-bold text-stadium-blue">{confidencePct}%</div>
         </div>
-        <div className="flex-1 bg-white/5 border border-white/8 rounded-lg px-2.5 py-1.5">
-          <div className="text-[8px] text-slate-500 font-semibold uppercase">Avg Response</div>
+        <div className="bg-white/5 border border-white/8 rounded-lg px-2 py-1">
+          <div className="text-[7px] text-slate-500 font-semibold uppercase">Avg Response</div>
           <div className="text-xs font-bold text-stadium-green">{metric.performance.avgResponseMs}ms</div>
         </div>
-        <div className="flex-1 bg-white/5 border border-white/8 rounded-lg px-2.5 py-1.5">
-          <div className="text-[8px] text-slate-500 font-semibold uppercase">Events/5m</div>
-          <div className="text-xs font-bold text-stadium-gold">{metric.performance.eventsLast5Min}</div>
+        <div className="bg-white/5 border border-white/8 rounded-lg px-2 py-1">
+          <div className="text-[7px] text-slate-500 font-semibold uppercase">Throughput</div>
+          <div className="text-xs font-bold text-stadium-gold">{metric.performance.eventsLast5Min}/5m</div>
         </div>
+      </div>
+
+      {/* Simulated Hardware Telemetry (CPU & Memory) */}
+      <div className="grid grid-cols-2 gap-2 text-[9px] bg-white/3 border border-white/8 rounded-lg p-2 font-mono">
+        <div className="flex justify-between items-center text-slate-400">
+          <span>CPU Usage:</span>
+          <span className="font-bold text-slate-200">
+            {metric.status === 'busy' ? '74%' : metric.status === 'idle' ? '2%' : '21%'}
+          </span>
+        </div>
+        <div className="flex justify-between items-center text-slate-400">
+          <span>Memory:</span>
+          <span className="font-bold text-slate-200">
+            {metric.status === 'busy' ? '176 MB' : '124 MB'}
+          </span>
+        </div>
+      </div>
+
+      {/* Queue Depth Sparkline (SVG) */}
+      <div className="bg-white/3 border border-white/8 rounded-lg p-2 flex items-center justify-between">
+        <span className="text-[8px] text-slate-500 font-bold uppercase tracking-wider">Queue Depth</span>
+        <svg className="w-24 h-6 shrink-0 overflow-visible" viewBox="0 0 100 20" aria-label="Queue depth history sparkline">
+          <path
+            d={metric.status === 'busy' ? "M0,15 L20,10 L40,18 L60,5 L80,12 L100,2" : "M0,18 L20,18 L40,15 L60,18 L80,15 L100,18"}
+            fill="none"
+            stroke={metric.color}
+            strokeWidth="1.5"
+            className="transition-all duration-300"
+          />
+        </svg>
       </div>
 
       {/* Current Task */}

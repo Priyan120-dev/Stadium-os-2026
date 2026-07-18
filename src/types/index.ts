@@ -155,6 +155,7 @@ export interface AgentMetric {
   recentEventIds: string[];
   performance: AgentPerformanceMetric;
   color: string;
+  stats?: AgentStats;
 }
 
 export type NavigationMode =
@@ -201,4 +202,31 @@ export interface ToastItem {
   message: string;
   type: 'info' | 'success' | 'warning' | 'critical';
   duration?: number;
+}
+
+export interface ConfidenceBreakdown {
+  navigation: number;
+  crowd: number;
+  accessibility: number;
+  emergency: number;
+}
+
+export interface AlternativeRoute {
+  name: string;
+  path: string[];
+  rejectionReason: string;
+}
+
+export interface DecisionImpact {
+  etaSavedMin: number;
+  congestionReductionPct: number;
+}
+
+export interface AgentStats {
+  healthScore: number;
+  cpuUsage: number;
+  memUsageMb: number;
+  throughputEventsPerMin: number;
+  lastHeartbeatMsAgo: number;
+  queueDepthHistory: number[];
 }

@@ -9,10 +9,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { StadiumOSProvider, useStadiumOS } from '../context/StadiumOSContext';
-import { Activity, Clock, Users, ShieldAlert, Heart, Compass, Globe, Sparkles } from 'lucide-react';
+import { Activity, Clock, Users, ShieldAlert, Heart, Compass, Globe, Sparkles, Search } from 'lucide-react';
 import { t } from '../utils/translations';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Toast } from '../components/Toast';
+import { CommandPalette } from '../components/CommandPalette';
 import './globals.css';
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
@@ -127,6 +128,16 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             >
               {t('status.reset', preferredLanguage)}
             </button>
+
+            {/* Command search trigger */}
+            <button
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+              className="p-1 sm:p-1.5 rounded bg-white/5 border border-white/10 text-slate-400 hover:text-slate-200 transition-all active:scale-95 text-[10px] sm:text-xs flex items-center gap-1.5"
+              aria-label="Search command console"
+            >
+              <Search className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <kbd className="hidden md:inline-block px-1 rounded bg-white/5 border border-white/8 text-[8px] font-mono text-slate-500">Ctrl+K</kbd>
+            </button>
           </div>
         </header>
 
@@ -153,6 +164,9 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </div>
+
+        {/* Global Command Palette Overlay */}
+        <CommandPalette />
 
       </body>
     </html>

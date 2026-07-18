@@ -117,6 +117,38 @@ export const CrowdIntelPanel = React.memo(function CrowdIntelPanel() {
         </div>
       </div>
 
+      {/* Predictive 60-Min Congestion Trends */}
+      <div className="shrink-0 bg-obsidian-card/45 border border-white/8 rounded-2xl p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="h-4 w-4 text-stadium-blue animate-pulse" />
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Predictive Congestion Trends</h3>
+          <span className="ml-auto text-[9px] text-stadium-blue font-mono">60-Min Forecast</span>
+        </div>
+        <div className="space-y-4">
+          {[
+            { label: 'Gate A Surge Risk', color: '#ff1744', val: '84% Peak', path: 'M0,15 L20,10 L40,18 L60,5 L80,3 L100,0' },
+            { label: 'NJ Transit Delays', color: '#ffd700', val: '+12m delay forecast', path: 'M0,18 L20,18 L40,15 L60,12 L80,10 L100,5' },
+            { label: 'Concourse B Jam Factor', color: '#00b0ff', val: 'Stable', path: 'M0,10 L20,11 L40,10 L60,11 L80,10 L100,10' }
+          ].map((trend, idx) => (
+            <div key={idx} className="bg-white/3 border border-white/8 rounded-xl p-3 flex items-center justify-between">
+              <div className="flex flex-col animate-slide-in-up">
+                <span className="text-[10px] font-bold text-slate-300">{trend.label}</span>
+                <span className="text-[9px] text-slate-500 font-semibold">{trend.val}</span>
+              </div>
+              <svg className="w-28 h-8 overflow-visible" viewBox="0 0 100 20" aria-label="Forecast sparkline">
+                <path
+                  d={trend.path}
+                  fill="none"
+                  stroke={trend.color}
+                  strokeWidth="2"
+                  className="animate-pulse"
+                />
+              </svg>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Active Crowd Incidents */}
       <div className="shrink-0 bg-obsidian-card/45 border border-white/8 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">

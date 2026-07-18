@@ -37,7 +37,7 @@ import {
 } from '../mockData';
 import { processLocalEvent } from '../agents/agents';
 import { translateText } from '../agents/translationAgent';
-import { ToastItem } from '../types';
+import { ToastItem, ConfidenceBreakdown, AlternativeRoute, DecisionImpact } from '../types';
 
 export interface StadiumOSContextType {
   // Database States
@@ -80,6 +80,13 @@ export interface StadiumOSContextType {
   toasts: ToastItem[];
   showToast: (message: string, type?: ToastItem['type'], duration?: number) => void;
   removeToast: (id: string) => void;
+  alternativeRoutes: AlternativeRoute[];
+  confidenceBreakdown: ConfidenceBreakdown | null;
+  decisionImpact: DecisionImpact | null;
+  trustScore: number;
+  decisionVersion: string;
+  decisionRationale: string;
+  updateDecisionExplainability: (rationale: string, breakdown: ConfidenceBreakdown, alternatives: AlternativeRoute[], impact: DecisionImpact) => void;
 }
 
 const StadiumOSContext = createContext<StadiumOSContextType | undefined>(undefined);
@@ -110,6 +117,33 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
   const [navigationMode, setNavigationMode] = useState<NavigationMode>('fastest');
 
   const activeUser = users['USR-001'] || initialUsers['USR-001'];
+
+  const [alternativeRoutes, setAlternativeRoutes] = useState<AlternativeRoute[]>([]);
+  const [confidenceBreakdown, setConfidenceBreakdown] = useState<ConfidenceBreakdown | null>(null);
+  const [decisionImpact, setDecisionImpact] = useState<DecisionImpact | null>(null);
+  const [trustScore, setTrustScore] = useState<number>(98.5);
+  const [decisionVersion, setDecisionVersion] = useState<string>('v1.0.0-INIT');
+  const [decisionRationale, setDecisionRationale] = useState<string>('');
+
+  const updateDecisionExplainability = useCallback((
+    rationale: string,
+    breakdown: ConfidenceBreakdown,
+    alternatives: AlternativeRoute[],
+    impact: DecisionImpact
+  ) => {
+    setDecisionRationale(rationale);
+    setConfidenceBreakdown(breakdown);
+    setAlternativeRoutes(alternatives);
+    setDecisionImpact(impact);
+    
+    // Generate simulated trust index and update version trace
+    setTrustScore(Math.round((95 + Math.random() * 4.9) * 10) / 10);
+    setDecisionVersion(prev => {
+      const match = prev.match(/v1\.0\.(\d+)/);
+      const nextNum = match ? parseInt(match[1], 10) + 1 : 1;
+      return `v1.0.${nextNum}-ROUTE`;
+    });
+  }, []);
 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -563,6 +597,12 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
     setHighlightedPath([]);
     setDemoState('ready');
     setToasts([]);
+    setAlternativeRoutes([]);
+    setConfidenceBreakdown(null);
+    setDecisionImpact(null);
+    setTrustScore(98.5);
+    setDecisionVersion('v1.0.0-INIT');
+    setDecisionRationale('');
     isWorkerProcessing = false;
   };
 
@@ -602,7 +642,14 @@ export function StadiumOSProvider({ children }: { children: React.ReactNode }) {
       resetDemo,
       toasts,
       showToast,
-      removeToast
+      removeToast,
+      alternativeRoutes,
+      confidenceBreakdown,
+      decisionImpact,
+      trustScore,
+      decisionVersion,
+      decisionRationale,
+      updateDecisionExplainability
     }}>
       {children}
     </StadiumOSContext.Provider>

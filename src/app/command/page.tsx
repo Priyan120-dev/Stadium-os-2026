@@ -10,6 +10,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useStadiumOS } from '../../context/StadiumOSContext';
 import StadiumMap from '../../components/StadiumMap';
 import { AgentMonitorPanel } from '../../components/AgentMonitorPanel';
+import { AgentPipelineTimeline } from '../../components/AgentPipelineTimeline';
 import { EventBusPanel } from '../../components/EventBusPanel';
 import { CrowdIntelPanel } from '../../components/CrowdIntelPanel';
 import { AnalyticsDashboard } from '../../components/AnalyticsDashboard';
@@ -225,13 +226,18 @@ export default function CommandMissionControlPage() {
 
         {/* AGENTS TAB */}
         {activeTab === 'agents' && (
-          <div className="h-full flex flex-col overflow-hidden">
-            <div className="shrink-0 mb-4">
-              <h2 className="font-display font-bold text-white text-sm">AI Agent Swarm Monitor</h2>
-              <p className="text-[10px] text-slate-500">Real-time status of all 12 specialized agents</p>
+          <div className="h-full flex flex-col lg:flex-row gap-4 lg:overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="shrink-0 mb-3">
+                <h2 className="font-display font-bold text-white text-sm">AI Agent Swarm Monitor</h2>
+                <p className="text-[10px] text-slate-500">Real-time status of all 12 specialized agents</p>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <AgentMonitorPanel />
+              </div>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <AgentMonitorPanel />
+            <div className="lg:w-80 shrink-0 flex flex-col overflow-hidden h-full">
+              <AgentPipelineTimeline events={agentEvents} />
             </div>
           </div>
         )}
