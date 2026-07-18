@@ -4,6 +4,8 @@ Stadium OS is a premium, real-time "Stadium Operating System & Mission Control" 
 
 ## 🚀 Live Demo Views
 
+> **🌐 Live Deployment:** **[https://stadium-os-2026-1.onrender.com](https://stadium-os-2026-1.onrender.com)**
+
 The dashboard features four interconnected layouts that coordinate in real time:
 - **Integrated Simulator Canvas (`/simulator`)**: A side-by-side widescreen layout showing the Fan Mobile, Volunteer Tablet, and Mission Control Digital Twin simultaneously.
 - **Fan Companion App (`/fan`)**: A mobile interface showing ticket scanning, step-free access profiles, concessions wait times, and a context-aware AI Copilot.
